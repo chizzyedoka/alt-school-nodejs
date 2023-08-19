@@ -2,7 +2,11 @@ const http = require("http");
 const fs = require("fs");
 // question 1
 const server = http.createServer((req, res) => {
-  if (req.url === "/index.html") {
+  if (req.url === "/") {
+    res.writeHead(200, { "content-type": "text/html" });
+    res.write("Welcome to the Home page");
+    res.end();
+  } else if (req.url === "/index.html") {
     res.writeHead(200, { "content-type": "text/html" });
     let html = fs.readFileSync("./index.html", "utf-8");
     res.end(html);

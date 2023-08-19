@@ -49,29 +49,47 @@ const server = http.createServer((req, res) => {
     }
     res.writeHead(400, { "content-type": "text/html" });
     res.end("Given id doesn't exist");
+  } else if (req.url.startsWith("/api/groceries") && req.method == "PUT") {
+    const idLink = req.url.split("/")[3];
+    // check if the id exist in the database
+    let groceryIndex = itemsDb.findIndex((grocery) => grocery.id === idLink);
+    if (groceryIndex != -1) {
+      const data = [];
+      req.on("data", (chunk) => {
+        data.push(chunk);
+      });
+      req.on("end", () => {
+        const bufferBody = Buffer.concat(data).toString();
+        const bodyOfRequet = JSON.parse(bufferBody);
+        itemsDb[groceryIndex] = {
+          ...bodyOfRequet,
+          id: itemsDb[groceryIndex].id,
+        };
+        res.writeHead(200, { "content-Type": "application/json" });
+        res.write(JSON.stringify(itemsDb[groceryIndex]));
+        res.end();
+      });
+      return;
+    }
+    res.writeHead(400, { "content-type": "text/html" });
+    res.end("Given id doesn't exist");
+  } else if (req.url.startsWith("/api/groceries") && req.method == "DELETE") {
+    const idLink = req.url.split("/")[3];
+    // check if the id exist in the database
+    let groceryIndex = itemsDb.findIndex((grocery) => grocery.id === idLink);
+    if (groceryIndex != -1) {
+      itemsDb.splice(groceryIndex, 1);
+      res.writeHead(200, { "content-type": "text/html" });
+      res.end(`Grocery with ${idLink} removed from Database `);
+      return;
+    }
+    res.writeHead(400, { "content-type": "text/html" });
+    res.end("Given id doesn't exist");
+  } else {
+    res.writeHead(400, { "content-Type": "text/html" });
+    res.write("Invalid request");
+    res.end();
   }
-  //else if (req.url.startsWith("/api/groceries") && req.method == "PUT") {
-  //     const idLink = req.url.split("/")[3];
-  //     // check if the id exist in the database
-  //     let groceryIndex = itemsDb.findIndex((grocery) => grocery.id === idLink);
-  //     if (groceryIndex != -1) {
-  //       const data = [];
-  //       req.on("data", (chunk) => {
-  //         data.push(chunk);
-  //       });
-  //       req.on("end", () => {
-  //         const bufferBody = Buffer.concat(data).toString();
-  //         const bodyOfRequet = JSON.parse(bodyOfRequet);
-  //         itemsDb[groceryIndex] = { ...bodyOfRequet, id: groceryIndex };
-  //       });
-  //       res.writeHead(200, { "content-Type": "application/json" });
-  //       res.write(JSON.stringify(itemsDb[groceryIndex]));
-  //       res.end();
-  //       return;
-  //     }
-  //     res.writeHead(400, { "content-type": "text/html" });
-  //     res.end("Given id doesn't exist");
-  //   }
 });
 
 server.listen(3000, () => {

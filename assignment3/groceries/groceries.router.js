@@ -1,6 +1,11 @@
 const express = require("express");
+const globalMiddlewares = require("../middleware/global.middleware");
 const router = express.Router();
 const controller = require("./groceries.controller");
+
+// router.use(globalMiddlewares.basicAuth);
+router.use(globalMiddlewares.apiKeyAuth);
+
 // GET all groceries
 router.get("/", controller.GetGroceries);
 
@@ -8,11 +13,26 @@ router.get("/", controller.GetGroceries);
 router.get("/:id", controller.getOneGrocery);
 
 // create a grocery
-router.post("/", controller.createGrocery);
+router.post(
+  "/",
+  globalMiddlewares.checkBody,
+  globalMiddlewares.checkAdmin,
+  controller.createGrocery
+);
 
 // update a grocery
-router.put("/:id", controller.updateGrocery);
+router.put(
+  "/:id",
+  globalMiddlewares.checkBody,
+  globalMiddlewares.checkAdmin,
+  controller.updateGrocery
+);
 
 // delete a grocery
-router.delete("/:id", controller.deleteGrocery);
+router.delete(
+  "/:id",
+  globalMiddlewares.checkBody,
+  globalMiddlewares.checkAdmin,
+  controller.deleteGrocery
+);
 module.exports = router;
